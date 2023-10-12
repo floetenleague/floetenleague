@@ -1,0 +1,6 @@
+package: apigen
+generate:
+  echo-server: true
+  client: true
+  models: true
+output: api/apigen/api_generated.go

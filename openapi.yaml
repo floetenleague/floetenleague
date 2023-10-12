@@ -1,0 +1,416 @@
+openapi: "3.0.0"
+info:
+  title: Flötenleague
+  version: 1.0.0
+paths:
+  /oauth2/poe/callback:
+    get:
+      operationId: poeCallback
+      responses:
+        "200":
+          description: Ok
+        default:
+          description: >-
+            Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /overview:
+    get:
+      operationId: getOverview
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FLOverview"
+        default:
+          description: >-
+            Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /bingo/{bingoID}/join:
+    post:
+      operationId: joinBingo
+      parameters:
+        - in: path
+          name: bingoID
+          schema:
+            type: integer
+            format: int64
+          required: true
+      responses:
+        "200":
+          description: Ok
+        default:
+          description: >-
+            Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /bingo/{bingoID}/status/{fieldID}/{userID}/{status}:
+    post:
+      operationId: setFieldStatus
+      parameters:
+        - in: path
+          name: bingoID
+          schema:
+            type: integer
+            format: int64
+          required: true
+        - in: path
+          name: fieldID
+          schema:
+            type: integer
+            format: int64
+          required: true
+        - in: path
+          name: userID
+          schema:
+            type: integer
+            format: int64
+          required: true
+        - in: path
+          name: status
+          schema:
+            $ref: "#/components/schemas/FLBingoFieldStatus"
+          required: true
+      responses:
+        "200":
+          description: Ok
+        default:
+          description: >-
+            Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /auth:
+    get:
+      operationId: getAuth
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginState"
+        default:
+          description: >-
+            Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /auth/logout:
+    post:
+      operationId: logout
+      responses:
+        "200":
+          description: Ok
+        default:
+          description: >-
+            Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /auth/login/poe:
+    post:
+      operationId: loginPoe
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: string
+        default:
+          description: >-
+            Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /auth/login/internal:
+    post:
+      operationId: loginInternal
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: LoginRequest
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: string
+
+        default:
+          description: >-
+            Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /user:
+    get:
+      operationId: getUsers
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        default:
+          description: >-
+            Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /user/{userID}/permission/{permission}:
+    post:
+      operationId: setUserPermission
+      parameters:
+        - in: path
+          name: userID
+          schema:
+            type: integer
+            format: int64
+          required: true
+        - in: path
+          name: permission
+          schema:
+            $ref: "#/components/schemas/UserPermission"
+          required: true
+      responses:
+        "200":
+          description: Ok
+        default:
+          description: >-
+            Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /bingoReview:
+    get:
+      operationId: getReviews
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FLBingoFieldReview"
+        default:
+          description: >-
+            Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - id
+        - username
+        - poeID
+        - createdAt
+        - activeAt
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type: string
+        permission:
+          $ref: "#/components/schemas/UserPermission"
+        createdAt:
+          type: string
+          format: date-time
+        activeAt:
+          type: string
+          format: date-time
+    FLOverview:
+      type: object
+      required:
+        - bingos
+      properties:
+        bingos:
+          type: array
+          items:
+            $ref: "#/components/schemas/FLBingo"
+    FLBingo:
+      type: object
+      required:
+        - id
+        - name
+        - fields
+        - size
+        - boards
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        size:
+          type: integer
+        fields:
+          type: array
+          items:
+            $ref: "#/components/schemas/FLBingoField"
+        boards:
+          type: array
+          items:
+            $ref: "#/components/schemas/FLBingoUserBoard"
+    FLBingoField:
+      type: object
+      required:
+        - id
+        - score
+        - description
+        - label
+      properties:
+        id:
+          type: integer
+          format: int64
+        label:
+          type: string
+        score:
+          type: integer
+          format: int64
+        description:
+          type: string
+    FLBingoUserBoard:
+      type: object
+      required:
+        - id
+        - username
+        - userId
+        - fields
+        - lastAt
+        - score
+      properties:
+        id:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        username:
+          type: string
+        lastAt:
+          type: string
+          format: date-time
+        score:
+          type: integer
+          format: int64
+        fields:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/FLBingoUserBoardField"
+    FLBingoUserBoardField:
+      type: object
+      required:
+        - status
+        - at
+      properties:
+        status:
+          $ref: "#/components/schemas/FLBingoFieldStatus"
+        at:
+          type: string
+          format: date-time
+    FLBingoFieldStatus:
+      type: string
+      enum:
+        - Blank
+        - DoneInReview
+        - Done
+        - Bingo
+    FLBingoFieldReview:
+      type: object
+      required:
+        - userID
+        - bingoFieldID
+        - bingoID
+        - fieldLabel
+        - username
+      properties:
+        userID:
+          type: integer
+          format: int64
+        bingoFieldID:
+          type: integer
+          format: int64
+        bingoID:
+          type: integer
+          format: int64
+        username:
+          type: string
+        fieldLabel:
+          type: string
+    UserPermission:
+      type: string
+      enum:
+        - Unverified
+        - Banned
+        - User
+        - Moderator
+    LoginState:
+      type: object
+      required:
+        - id
+        - username
+        - permission
+        - loggedIn
+      properties:
+        loggedIn:
+          type: boolean
+        id:
+          type: integer
+          format: int64
+        username:
+          type: string
+        permission:
+          $ref: "#/components/schemas/UserPermission"
+    ApiError:
+      type: object
+      required:
+        - error
+        - description
+      properties:
+        error:
+          type: string
+          example: Bad Request
+        description:
+          type: string
+          example: "could not parse request: invalid json: EOF"

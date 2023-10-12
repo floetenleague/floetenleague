@@ -1,0 +1,4 @@
+/ui/src/generated/
+/api/apigen/
+/database/dbgen/
+/conv/convgen/

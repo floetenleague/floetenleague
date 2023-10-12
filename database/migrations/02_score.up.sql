@@ -1,0 +1,1 @@
+ALTER TABLE bingo_fields ADD COLUMN score INT NOT NULL DEFAULT 1;
